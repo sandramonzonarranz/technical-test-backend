@@ -1,6 +1,8 @@
 package com.playtomic.tests.wallet.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.playtomic.tests.wallet.domain.Payment;
+import com.playtomic.tests.wallet.service.exceptions.StripeServiceException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
