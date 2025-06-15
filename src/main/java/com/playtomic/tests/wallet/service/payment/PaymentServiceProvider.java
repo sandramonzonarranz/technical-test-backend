@@ -1,4 +1,4 @@
-package com.playtomic.tests.wallet.service;
+package com.playtomic.tests.wallet.service.payment;
 
 import org.springframework.stereotype.Component;
 import java.util.List;

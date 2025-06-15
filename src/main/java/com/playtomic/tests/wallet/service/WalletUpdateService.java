@@ -1,4 +1,4 @@
-package com.playtomic.tests.wallet.domain.listener;
+package com.playtomic.tests.wallet.service;
 
 import com.playtomic.tests.wallet.domain.event.PaymentCompletedEvent;
 import com.playtomic.tests.wallet.domain.event.WalletReconciliationEvent;

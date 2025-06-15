@@ -1,4 +1,4 @@
-package com.playtomic.tests.wallet.service;
+package com.playtomic.tests.wallet.service.payment;
 
 import com.playtomic.tests.wallet.service.exceptions.StripeAmountTooSmallException;
 import org.springframework.http.HttpStatus;

@@ -3,7 +3,7 @@ package com.playtomic.tests.wallet.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.playtomic.tests.wallet.domain.Payment;
-import com.playtomic.tests.wallet.service.StripeService;
+import com.playtomic.tests.wallet.service.payment.StripeService;
 import com.playtomic.tests.wallet.service.exceptions.StripeAmountTooSmallException;
 import com.playtomic.tests.wallet.service.exceptions.StripeServiceException;
 import org.junit.jupiter.api.Test;

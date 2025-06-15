@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+		"name": "Wallet Service",
+		"description": "A collection to test the Wallet Service application endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Login and Get Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+							"    console.log(\"JWT Token set successfully.\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"user\",\n    \"password\": \"password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"login"
+					]
+				},
+				"description": "Authenticates the user and saves the returned JWT to a collection variable `jwt_token`."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Get Wallet by ID",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/v1/wallets/{{walletId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"wallets",
+						"{{walletId}}"
+					]
+				},
+				"description": "Fetches the details for a specific wallet. Requires a valid `walletId` and the JWT obtained from logging in."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Top-up Wallet",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 25.50,\n    \"creditCardNumber\": \"4242424242424242\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/wallets/{{walletId}}/top-up",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"wallets",
+						"{{walletId}}",
+						"top-up"
+					]
+				},
+				"description": "Adds funds to a specific wallet. Requires a valid `walletId` and the JWT obtained from logging in."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8090",
+			"type": "string",
+			"description": "The base URL of the running Spring Boot application."
+		},
+		{
+			"key": "walletId",
+			"value": "",
+			"type": "string",
+			"description": "NOTE: You must manually set this value. After starting the application, a wallet is not created by default. You will need to inspect the H2 database console to get the UUID of a wallet to test against."
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string",
+			"description": "This variable is set automatically after a successful login request."
+		}
+	]
+}
