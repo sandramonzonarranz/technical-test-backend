@@ -1,7 +1,7 @@
 package com.playtomic.tests.wallet.domain.repository;
 
 
-import com.playtomic.tests.wallet.store.repository.Wallet;
+import com.playtomic.tests.wallet.store.Wallet;
 import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;

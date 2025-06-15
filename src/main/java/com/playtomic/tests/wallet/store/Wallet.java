@@ -1,4 +1,4 @@
-package com.playtomic.tests.wallet.store.repository;
+package com.playtomic.tests.wallet.store;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

@@ -4,7 +4,7 @@ import com.playtomic.tests.wallet.controller.AuthController;
 import com.playtomic.tests.wallet.controller.WalletController;
 import com.playtomic.tests.wallet.controller.WalletTransactionController;
 import com.playtomic.tests.wallet.service.payment.Payment;
-import com.playtomic.tests.wallet.store.repository.Wallet;
+import com.playtomic.tests.wallet.store.Wallet;
 import com.playtomic.tests.wallet.domain.listener.NotificationListener;
 import com.playtomic.tests.wallet.domain.listener.PaymentListener;
 import com.playtomic.tests.wallet.domain.listener.WalletListener;

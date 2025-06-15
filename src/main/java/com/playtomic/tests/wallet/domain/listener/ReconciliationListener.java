@@ -15,7 +15,7 @@ public class ReconciliationListener {
     @Async
     @EventListener
     public void handleReconciliation(WalletReconciliationEvent event) {
-        log.warn("Starting Reconciliation process for Wallet ID: {}, PaymentId: {} Amount: {} ", event.walletId(), event.paymentId(), event.amount());
+        log.info("Starting Reconciliation process for Wallet ID: {}, PaymentId: {} Amount: {} ", event.walletId(), event.paymentId(), event.amount());
         // TODO: Here we'll do the logic for reconciliation
     }
 

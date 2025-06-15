@@ -4,7 +4,7 @@ import com.playtomic.tests.wallet.domain.event.PaymentCompletedEvent;
 import com.playtomic.tests.wallet.domain.event.WalletReconciliationEvent;
 import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import com.playtomic.tests.wallet.service.exceptions.WalletNotFoundException;
-import com.playtomic.tests.wallet.store.repository.WalletTransaction;
+import com.playtomic.tests.wallet.store.WalletTransaction;
 import com.playtomic.tests.wallet.store.repository.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

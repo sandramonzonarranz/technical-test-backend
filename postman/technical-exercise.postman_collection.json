@@ -97,7 +97,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"amount\": 25.50,\n    \"creditCardNumber\": \"4242424242424242\"\n}",
+					"raw": "{\n    \"amount\": 25.50,\n    \"creditCardNumber\": \"4242424242424242\",\n    \"paymentProvider\": \"STRIPE\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -117,6 +117,37 @@
 					]
 				},
 				"description": "Adds funds to a specific wallet. Requires a valid `walletId` and the JWT obtained from logging in."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Get Wallet Transactions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/v1/wallets/{{walletId}}/transactions",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"wallets",
+						"{{walletId}}",
+						"transactions"
+					]
+				},
+				"description": "Fetches the transaction history for a specific wallet. Requires a valid `walletId` and the JWT obtained from logging in."
 			},
 			"response": []
 		}

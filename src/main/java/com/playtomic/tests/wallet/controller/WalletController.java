@@ -6,8 +6,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +23,6 @@ import java.util.UUID;
 public class WalletController {
 
     private final WalletService walletService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(WalletController.class);  // TODO añadir logs
 
     public record TopUpRequest(
             @NotNull

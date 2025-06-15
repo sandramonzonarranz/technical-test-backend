@@ -3,7 +3,7 @@ package com.playtomic.tests.wallet.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.playtomic.tests.wallet.configuration.SecurityConfig;
 import com.playtomic.tests.wallet.configuration.jwt.JwtTokenProvider;
-import com.playtomic.tests.wallet.store.repository.Wallet;
+import com.playtomic.tests.wallet.store.Wallet;
 import com.playtomic.tests.wallet.service.WalletService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

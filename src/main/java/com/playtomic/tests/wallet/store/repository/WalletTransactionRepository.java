@@ -1,5 +1,6 @@
 package com.playtomic.tests.wallet.store.repository;
 
+import com.playtomic.tests.wallet.store.WalletTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

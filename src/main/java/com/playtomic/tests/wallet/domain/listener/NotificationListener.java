@@ -27,7 +27,8 @@ public class NotificationListener {
                 "Dear user, we are so sorry to inform you that your top-up has failed due to: %s.",
                 event.reason()
         );
-
+        log.info("Sending failure email to {} with subject '{}'", userEmail, subject);
         emailSender.send(userEmail, subject, body);
+
     }
 }

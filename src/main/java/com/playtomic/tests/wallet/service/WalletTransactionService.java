@@ -1,6 +1,6 @@
 package com.playtomic.tests.wallet.service;
 
-import com.playtomic.tests.wallet.store.repository.WalletTransaction;
+import com.playtomic.tests.wallet.store.WalletTransaction;
 import com.playtomic.tests.wallet.store.repository.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

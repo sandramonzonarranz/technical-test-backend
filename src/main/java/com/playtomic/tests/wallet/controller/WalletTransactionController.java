@@ -1,7 +1,7 @@
 package com.playtomic.tests.wallet.controller;
 
 import com.playtomic.tests.wallet.service.WalletTransactionService;
-import com.playtomic.tests.wallet.store.repository.WalletTransaction;
+import com.playtomic.tests.wallet.store.WalletTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
