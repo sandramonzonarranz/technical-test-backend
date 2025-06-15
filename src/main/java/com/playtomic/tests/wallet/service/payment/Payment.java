@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public class Payment {  // TODO: Record¿
+public class Payment {
 
     @NonNull
     private final String id;

@@ -29,7 +29,7 @@ public class WalletTransaction {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-   // @JoinColumn(name = "wallet_id", nullable = false)
+    @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
     @Column(nullable = false)
