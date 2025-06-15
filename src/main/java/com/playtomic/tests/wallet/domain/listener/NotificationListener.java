@@ -2,6 +2,7 @@ package com.playtomic.tests.wallet.domain.listener;
 
 
 import com.playtomic.tests.wallet.domain.event.PaymentFailedEvent;
+import com.playtomic.tests.wallet.service.FakeEmailSenderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

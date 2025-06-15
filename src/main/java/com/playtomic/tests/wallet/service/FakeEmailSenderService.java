@@ -1,4 +1,4 @@
-package com.playtomic.tests.wallet.domain.listener;
+package com.playtomic.tests.wallet.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

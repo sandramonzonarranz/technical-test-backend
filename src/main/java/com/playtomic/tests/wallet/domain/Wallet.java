@@ -20,7 +20,7 @@ public class Wallet {
     @UuidGenerator
     private UUID id;
 
-    @Column(nullable = false, scale = 2, precision = 4)
+    @Column(nullable = false, scale = 2, precision = 10)
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Version

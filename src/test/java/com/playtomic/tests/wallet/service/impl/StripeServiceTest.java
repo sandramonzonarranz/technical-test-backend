@@ -30,8 +30,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RestClientTest(StripeService.class)
 public class StripeServiceTest {
 
-    public static final String CREDIT_CARD_NUMBER = "4242 4242 4242 4242";
-    public static final String PAYMENT_ID = "id123";
+    private static final String CREDIT_CARD_NUMBER = "4242 4242 4242 4242";
+    private static final String PAYMENT_ID = "id123";
 
     private final URI testChargesUri = URI.create("https://sandbox.playtomic.io/v1/stripe-simulator/charges");
     private final URI testRefundsUri = URI.create("testUrl/refunds");

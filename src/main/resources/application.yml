@@ -1,6 +1,14 @@
 spring.profiles.active: develop
 server:
   port: 8090
+jwt:
+  secret-key: C2x5A8B4F0E2D6G3H1J4K7L9M1N3P5R8S0T2U4V6W8Y1Z3A5B7D9G2J4L6N8R0
+  expiration-ms: 3600000 # 1 hour
+
+spring.h2.console:
+  enabled: true
+  path: /h2-console
+
 ---
 spring.config.activate.on-profile: develop
 spring:
