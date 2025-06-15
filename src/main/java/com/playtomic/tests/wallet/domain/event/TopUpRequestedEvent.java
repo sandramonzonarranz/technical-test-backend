@@ -3,5 +3,5 @@ package com.playtomic.tests.wallet.domain.event;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record TopUpRequestedEvent(UUID walletId, String paymentId, BigDecimal amount) {}
+public record TopUpRequestedEvent(UUID walletId, String creditCardNumber, BigDecimal amount, String provider) {}
 

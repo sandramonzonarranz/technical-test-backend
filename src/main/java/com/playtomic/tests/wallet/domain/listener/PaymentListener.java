@@ -3,7 +3,8 @@ package com.playtomic.tests.wallet.domain.listener;
 import com.playtomic.tests.wallet.domain.event.PaymentCompletedEvent;
 import com.playtomic.tests.wallet.domain.event.PaymentFailedEvent;
 import com.playtomic.tests.wallet.domain.event.TopUpRequestedEvent;
-import com.playtomic.tests.wallet.service.StripeService;
+import com.playtomic.tests.wallet.service.PaymentService;
+import com.playtomic.tests.wallet.service.PaymentServiceProvider;
 import com.playtomic.tests.wallet.service.exceptions.StripeServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,14 +16,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class PaymentListener {
 
-    private final StripeService stripeService;  // posible ampliacion a cualquier servicio de pago
+    private final PaymentServiceProvider paymentServiceProvider;
     private final ApplicationEventPublisher eventPublisher;
 
     @Async
     @TransactionalEventListener
     public void handleTopUpRequest(TopUpRequestedEvent event) {
         try {
-            var payment = stripeService.charge(event.paymentId(), event.amount());
+            PaymentService paymentService = paymentServiceProvider.getService(event.provider());
+            var payment = paymentService.charge(event.creditCardNumber(), event.amount());
             eventPublisher.publishEvent(new PaymentCompletedEvent(event.walletId(), payment.getId(), event.amount()));
         } catch (StripeServiceException e) {
             eventPublisher.publishEvent(new PaymentFailedEvent(event.walletId(), e.getClass().getSimpleName()));  //TODO añadir motivo

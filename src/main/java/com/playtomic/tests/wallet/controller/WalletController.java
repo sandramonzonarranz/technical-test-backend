@@ -23,7 +23,7 @@ public class WalletController {
     private final WalletService walletService;
     private static final Logger LOGGER = LoggerFactory.getLogger(WalletController.class);  // TODO añadir logs
 
-    public record TopUpRequest(BigDecimal amount, String creditCardNumber) {}
+    public record TopUpRequest(BigDecimal amount, String creditCardNumber, String paymentProvider) {}
     public record WalletResponse(UUID id, BigDecimal balance) {}
 
     @GetMapping("/{walletId}")
@@ -34,7 +34,7 @@ public class WalletController {
 
     @PostMapping("/{walletId}/top-up")
     public ResponseEntity<Void> topUpWallet(@PathVariable UUID walletId, @RequestBody TopUpRequest request) {
-        walletService.topUp(walletId, request.amount(), request.creditCardNumber());
+        walletService.topUp(walletId, request.amount(), request.creditCardNumber(), request.paymentProvider());
         return ResponseEntity.accepted().build();
     }
 

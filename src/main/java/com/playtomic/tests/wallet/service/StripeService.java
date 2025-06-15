@@ -21,7 +21,9 @@ import java.net.URI;
  * This dummy implementation throws an error when trying to charge less than 10€.
  */
 @Service
-public class StripeService {
+public class StripeService implements PaymentService {
+
+    private static final String STRIPE = "STRIPE";
 
     @NonNull
     private URI chargesUri;
@@ -53,6 +55,7 @@ public class StripeService {
      *
      * @throws StripeServiceException
      */
+    @Override
     public Payment charge(@NonNull String creditCardNumber, @NonNull BigDecimal amount) throws StripeServiceException {
         ChargeRequest body = new ChargeRequest(creditCardNumber, amount);
         return restTemplate.postForObject(chargesUri, body, Payment.class);
@@ -61,9 +64,14 @@ public class StripeService {
     /**
      * Refunds the specified payment.
      */
+    @Override
     public void refund(@NonNull String paymentId) throws StripeServiceException {
         // Object.class because we don't read the body here.
         restTemplate.postForEntity(chargesUri.toString(), null, Object.class, paymentId);
+    }
+    @Override
+    public String getProviderId() {
+        return STRIPE;
     }
 
     @AllArgsConstructor
