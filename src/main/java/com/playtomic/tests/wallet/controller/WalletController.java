@@ -1,6 +1,10 @@
 package com.playtomic.tests.wallet.controller;
 
 import com.playtomic.tests.wallet.service.WalletService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +27,17 @@ public class WalletController {
     private final WalletService walletService;
     private static final Logger LOGGER = LoggerFactory.getLogger(WalletController.class);  // TODO añadir logs
 
-    public record TopUpRequest(BigDecimal amount, String creditCardNumber, String paymentProvider) {}
+    public record TopUpRequest(
+            @NotNull
+            @DecimalMin(value = "0.01", message = "Amount must be positive")
+            BigDecimal amount,
+
+            @NotBlank(message = "Credit card number cannot be blank")
+            String creditCardNumber,
+
+            @NotBlank(message = "Payment provider cannot be blank")
+            String paymentProvider
+    ) {}
     public record WalletResponse(UUID id, BigDecimal balance) {}
 
     @GetMapping("/{walletId}")
@@ -33,7 +47,7 @@ public class WalletController {
     }
 
     @PostMapping("/{walletId}/top-up")
-    public ResponseEntity<Void> topUpWallet(@PathVariable UUID walletId, @RequestBody TopUpRequest request) {
+    public ResponseEntity<Void> topUpWallet(@PathVariable UUID walletId, @Valid @RequestBody TopUpRequest request) {
         walletService.topUp(walletId, request.amount(), request.creditCardNumber(), request.paymentProvider());
         return ResponseEntity.accepted().build();
     }
