@@ -2,8 +2,10 @@ package com.playtomic.tests.wallet.service;
 
 import com.playtomic.tests.wallet.domain.event.PaymentCompletedEvent;
 import com.playtomic.tests.wallet.domain.event.WalletReconciliationEvent;
-import com.playtomic.tests.wallet.domain.repository.WalletRepository;
+import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import com.playtomic.tests.wallet.service.exceptions.WalletNotFoundException;
+import com.playtomic.tests.wallet.store.repository.WalletTransaction;
+import com.playtomic.tests.wallet.store.repository.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,8 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class WalletUpdateService {
 
     private static final int MAX_ATTEMPTS = 3;
-    private final WalletRepository walletRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final WalletTransactionRepository walletTransactionRepository;
+    private final WalletRepository walletRepository;
 
 
     /**
@@ -39,7 +42,10 @@ public class WalletUpdateService {
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found for ID: " + event.walletId()));
 
         wallet.topUp(event.amount());
-        walletRepository.saveAndFlush(wallet);
+        walletRepository.save(wallet);
+
+        WalletTransaction transaction = new WalletTransaction(null, wallet, event.amount(), WalletTransaction.TransactionType.TOP_UP, null);
+        walletTransactionRepository.save(transaction);
     }
 
     /**

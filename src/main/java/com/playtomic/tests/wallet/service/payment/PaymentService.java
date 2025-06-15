@@ -1,7 +1,6 @@
 package com.playtomic.tests.wallet.service.payment;
 
 
-import com.playtomic.tests.wallet.domain.Payment;
 import com.playtomic.tests.wallet.service.exceptions.PaymentServiceException;
 import com.playtomic.tests.wallet.service.exceptions.StripeServiceException;
 import lombok.NonNull;

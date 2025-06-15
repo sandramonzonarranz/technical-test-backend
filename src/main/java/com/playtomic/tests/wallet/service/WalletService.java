@@ -1,6 +1,6 @@
 package com.playtomic.tests.wallet.service;
-import com.playtomic.tests.wallet.domain.Wallet;
-import com.playtomic.tests.wallet.domain.repository.WalletRepository;
+import com.playtomic.tests.wallet.store.repository.Wallet;
+import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import com.playtomic.tests.wallet.domain.event.TopUpRequestedEvent;
 import com.playtomic.tests.wallet.service.exceptions.WalletNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,14 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Wallet findById(UUID walletId) {
-        return walletRepository.findById(walletId).orElseThrow(WalletNotFoundException::new);
+        return walletRepository.findById(walletId)
+                .orElseGet(() -> createNewWallet(walletId));
+    }
+
+    private Wallet createNewWallet(UUID walletId) {
+        return walletRepository.save(new Wallet(BigDecimal.ZERO, walletId));
     }
 
     /**

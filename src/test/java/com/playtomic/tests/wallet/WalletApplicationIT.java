@@ -2,12 +2,13 @@ package com.playtomic.tests.wallet;
 
 import com.playtomic.tests.wallet.controller.AuthController;
 import com.playtomic.tests.wallet.controller.WalletController;
-import com.playtomic.tests.wallet.domain.Payment;
-import com.playtomic.tests.wallet.domain.Wallet;
+import com.playtomic.tests.wallet.controller.WalletTransactionController;
+import com.playtomic.tests.wallet.service.payment.Payment;
+import com.playtomic.tests.wallet.store.repository.Wallet;
 import com.playtomic.tests.wallet.domain.listener.NotificationListener;
 import com.playtomic.tests.wallet.domain.listener.PaymentListener;
 import com.playtomic.tests.wallet.domain.listener.WalletListener;
-import com.playtomic.tests.wallet.domain.repository.WalletRepository;
+import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import com.playtomic.tests.wallet.service.payment.PaymentServiceProvider;
 import com.playtomic.tests.wallet.service.payment.StripeService;
 import com.playtomic.tests.wallet.service.exceptions.StripeAmountTooSmallException;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -45,8 +48,13 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 public class WalletApplicationIT {
 
+	private static final UUID ID = UUID.randomUUID();
 	private static final String INITIAL_BALANCE = "100.00";
 	private static final String PAYMENT_PROVIDER = "STRIPE";
+	private static final String TOP_UP = "/top-up";
+	private static final String TRANSACTIONS = "/transactions";
+	private static final String V1_AUTH_LOGIN = "/v1/auth/login";
+	private static final String V1_WALLETS = "/v1/wallets/";
 
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -73,13 +81,13 @@ public class WalletApplicationIT {
 
 	@Test
 	void testGetWalletById() {
-		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal(INITIAL_BALANCE)));
+		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal(INITIAL_BALANCE), ID));
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(obtainJwtToken());
 		HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
 		ResponseEntity<WalletController.WalletResponse> response = restTemplate.exchange(
-				"/v1/wallets/" + wallet.getId(),
+				V1_WALLETS + wallet.getId(),
 				HttpMethod.GET,
 				requestEntity,
 				WalletController.WalletResponse.class
@@ -92,7 +100,7 @@ public class WalletApplicationIT {
 
 	@Test
 	void testTopUpWalletOkFlow() {
-		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal("10.00")));
+		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal("10.00"), ID));
 		UUID walletId = wallet.getId();
 		when(paymentServiceProvider.getService(PAYMENT_PROVIDER)).thenReturn(stripeService);
 		when(stripeService.charge(anyString(), any(BigDecimal.class))).thenReturn(new Payment("payment-id-123"));
@@ -101,7 +109,7 @@ public class WalletApplicationIT {
 		var topUpRequest = new WalletController.TopUpRequest(new BigDecimal("50.00"), "4242", PAYMENT_PROVIDER);
 		HttpEntity<WalletController.TopUpRequest> requestEntity = new HttpEntity<>(topUpRequest, headers);
 
-		ResponseEntity<Void> response = restTemplate.postForEntity("/v1/wallets/" + walletId + "/top-up", requestEntity, Void.class);
+		ResponseEntity<Void> response = restTemplate.postForEntity(V1_WALLETS + walletId + TOP_UP, requestEntity, Void.class);
 
 		assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
 		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -111,11 +119,22 @@ public class WalletApplicationIT {
 		verify(paymentListener, timeout(1000)).handleTopUpRequest(any());
 		verify(walletListener, timeout(1000)).handlePaymentCompleted(any());
 		verify(notificationListener, never()).handlePaymentFailure(any());
+
+		ResponseEntity<List<WalletTransactionController.TransactionResponse>> transactionResponse = restTemplate.exchange(
+				V1_WALLETS + walletId + TRANSACTIONS,
+				HttpMethod.GET,
+				requestEntity,
+				new ParameterizedTypeReference<>() {}
+		);
+		assertEquals(HttpStatus.OK, transactionResponse.getStatusCode());
+		assertNotNull(transactionResponse.getBody());
+		assertEquals(1, transactionResponse.getBody().size());
+		assertEquals(0, new BigDecimal("50.00").compareTo(transactionResponse.getBody().get(0).amount()));
 	}
 
 	@Test
 	void testTopUpWalletKOFlow() {
-		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal("20.00")));
+		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal("20.00"), ID));
 		UUID walletId = wallet.getId();
 		when(paymentServiceProvider.getService(PAYMENT_PROVIDER)).thenReturn(stripeService);
 		when(stripeService.charge(anyString(), any(BigDecimal.class))).thenThrow(new StripeAmountTooSmallException());
@@ -125,7 +144,7 @@ public class WalletApplicationIT {
 		var topUpRequest = new WalletController.TopUpRequest(new BigDecimal("5.00"), "1234", PAYMENT_PROVIDER);
 		HttpEntity<WalletController.TopUpRequest> requestEntity = new HttpEntity<>(topUpRequest, headers);
 
-		ResponseEntity<Void> response = restTemplate.postForEntity("/v1/wallets/" + walletId + "/top-up", requestEntity, Void.class);
+		ResponseEntity<Void> response = restTemplate.postForEntity(V1_WALLETS + walletId + TOP_UP, requestEntity, Void.class);
 		assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
 
 		verify(paymentListener, timeout(1000)).handleTopUpRequest(any());
@@ -138,7 +157,7 @@ public class WalletApplicationIT {
 
 	private String obtainJwtToken() {
 		var loginRequest = new AuthController.LoginRequest("user", "password");
-		ResponseEntity<AuthController.LoginResponse> response = restTemplate.postForEntity("/v1/auth/login", loginRequest, AuthController.LoginResponse.class);
+		ResponseEntity<AuthController.LoginResponse> response = restTemplate.postForEntity(V1_AUTH_LOGIN, loginRequest, AuthController.LoginResponse.class);
 		assertNotNull(response.getBody());
 		return response.getBody().token();
 	}

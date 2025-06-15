@@ -29,7 +29,7 @@ public class WalletController {
 
     public record TopUpRequest(
             @NotNull
-            @DecimalMin(value = "0.01", message = "Amount must be positive")
+            @DecimalMin(value = "10.0", message = "Amount must be positive and greater than or equal to 10.0")
             BigDecimal amount,
 
             @NotBlank(message = "Credit card number cannot be blank")

@@ -1,7 +1,8 @@
 package com.playtomic.tests.wallet.domain.repository;
 
 
-import com.playtomic.tests.wallet.domain.Wallet;
+import com.playtomic.tests.wallet.store.repository.Wallet;
+import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class WalletRepositoryTest {
 
     private static final BigDecimal INITIAL_BALANCE = new BigDecimal("100.50");
+    private static final UUID ID = UUID.randomUUID();
 
     @Autowired
     private WalletRepository walletRepository;
@@ -27,7 +30,7 @@ public class WalletRepositoryTest {
 
     @Test
     void testSaveAndFindById() {
-        Wallet newWallet = new Wallet(INITIAL_BALANCE);
+        Wallet newWallet = new Wallet(INITIAL_BALANCE, ID);
 
         Wallet savedWallet = walletRepository.save(newWallet);
         entityManager.flush();
@@ -42,7 +45,7 @@ public class WalletRepositoryTest {
 
     @Test
     void optimisticLocking_shouldIncrementVersionOnUpdate() {
-        Wallet wallet = walletRepository.saveAndFlush(new Wallet(INITIAL_BALANCE));
+        Wallet wallet = walletRepository.saveAndFlush(new Wallet(INITIAL_BALANCE, ID));
         assertEquals(0L, wallet.getVersion());
 
         wallet.topUp(new BigDecimal("50.00"));
@@ -56,7 +59,7 @@ public class WalletRepositoryTest {
 
     @Test
     void testConcurrentUpdatesThrowException() {
-        Wallet wallet1 = walletRepository.saveAndFlush(new Wallet(new BigDecimal("300.00")));
+        Wallet wallet1 = walletRepository.saveAndFlush(new Wallet(new BigDecimal("300.00"), ID));
         Wallet walletInstance1 = walletRepository.findById(wallet1.getId()).orElseThrow(() -> new IllegalStateException("Wallet not found with ID: " + wallet1.getId()));
         entityManager.clear();
         Wallet walletInstance2 = walletRepository.findById(wallet1.getId()).orElseThrow(() -> new IllegalStateException("Wallet not found with ID: " + wallet1.getId()));
