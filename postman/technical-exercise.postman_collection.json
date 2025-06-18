@@ -97,7 +97,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"amount\": 25.50,\n    \"creditCardNumber\": \"4242424242424242\",\n    \"paymentProvider\": \"STRIPE\"\n}",
+					"raw": "{\n    \"idempotencyKey\": \"{{$guid}}\",\n    \"amount\": 25.50,\n    \"creditCardNumber\": \"4242424242424242\",\n    \"paymentProvider\": \"STRIPE\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -116,7 +116,7 @@
 						"top-up"
 					]
 				},
-				"description": "Adds funds to a specific wallet. Requires a valid `walletId` and the JWT obtained from logging in."
+				"description": "Adds funds to a specific wallet. Requires a valid `walletId`, a JWT, and a unique `idempotencyKey` (a new GUID is generated for each request)."
 			},
 			"response": []
 		},

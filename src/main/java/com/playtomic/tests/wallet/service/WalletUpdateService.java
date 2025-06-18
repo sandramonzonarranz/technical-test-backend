@@ -2,8 +2,8 @@ package com.playtomic.tests.wallet.service;
 
 import com.playtomic.tests.wallet.domain.event.PaymentCompletedEvent;
 import com.playtomic.tests.wallet.domain.event.WalletReconciliationEvent;
+import com.playtomic.tests.wallet.store.Wallet;
 import com.playtomic.tests.wallet.store.repository.WalletRepository;
-import com.playtomic.tests.wallet.service.exceptions.WalletNotFoundException;
 import com.playtomic.tests.wallet.store.WalletTransaction;
 import com.playtomic.tests.wallet.store.repository.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +38,19 @@ public class WalletUpdateService {
     )
     @Transactional
     public void applyTopUp(PaymentCompletedEvent event) {
-        var wallet = walletRepository.findById(event.walletId())
-                .orElseThrow(() -> new WalletNotFoundException("Wallet not found for ID: " + event.walletId()));
+        WalletTransaction transaction = walletTransactionRepository.findByWalletIdAndIdempotencyKey(event.walletId(), event.idempotencyKey())
+                .orElseThrow(() -> new IllegalStateException("FATAL: No PENDING transaction found for completed payment."));
 
+        if (transaction.getStatus() != WalletTransaction.Status.PENDING) {
+            log.warn("Transaction {} for wallet {} already has status {}. Skipping update.", transaction.getId(), event.walletId(), transaction.getStatus());
+            return;
+        }
+
+        Wallet wallet = transaction.getWallet();
         wallet.topUp(event.amount());
-        walletRepository.save(wallet);
+        transaction.setStatus(WalletTransaction.Status.COMPLETED);
 
-        WalletTransaction transaction = new WalletTransaction(null, wallet, event.amount(), WalletTransaction.TransactionType.TOP_UP, null);
+        walletRepository.save(wallet);
         walletTransactionRepository.save(transaction);
     }
 

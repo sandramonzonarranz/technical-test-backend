@@ -3,15 +3,15 @@ package com.playtomic.tests.wallet;
 import com.playtomic.tests.wallet.controller.AuthController;
 import com.playtomic.tests.wallet.controller.WalletController;
 import com.playtomic.tests.wallet.controller.WalletTransactionController;
-import com.playtomic.tests.wallet.service.payment.Payment;
-import com.playtomic.tests.wallet.store.Wallet;
 import com.playtomic.tests.wallet.domain.listener.NotificationListener;
 import com.playtomic.tests.wallet.domain.listener.PaymentListener;
 import com.playtomic.tests.wallet.domain.listener.WalletListener;
-import com.playtomic.tests.wallet.store.repository.WalletRepository;
+import com.playtomic.tests.wallet.service.exceptions.StripeAmountTooSmallException;
+import com.playtomic.tests.wallet.service.payment.Payment;
 import com.playtomic.tests.wallet.service.payment.PaymentServiceProvider;
 import com.playtomic.tests.wallet.service.payment.StripeService;
-import com.playtomic.tests.wallet.service.exceptions.StripeAmountTooSmallException;
+import com.playtomic.tests.wallet.store.Wallet;
+import com.playtomic.tests.wallet.store.repository.WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -99,25 +99,26 @@ public class WalletApplicationIT {
 	}
 
 	@Test
-	void testTopUpWalletOkFlow() {
-		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal("10.00"), ID));
+	void testTopUpWalletOkFlowAndIdempotency() {
+		Wallet wallet = walletRepository.save(new Wallet(new BigDecimal(INITIAL_BALANCE), ID));
 		UUID walletId = wallet.getId();
 		when(paymentServiceProvider.getService(PAYMENT_PROVIDER)).thenReturn(stripeService);
 		when(stripeService.charge(anyString(), any(BigDecimal.class))).thenReturn(new Payment("payment-id-123"));
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(obtainJwtToken());
-		var topUpRequest = new WalletController.TopUpRequest(new BigDecimal("50.00"), "4242", PAYMENT_PROVIDER);
+		var topUpRequest = new WalletController.TopUpRequest(UUID.randomUUID(), new BigDecimal("50.00"), "4242", PAYMENT_PROVIDER);
 		HttpEntity<WalletController.TopUpRequest> requestEntity = new HttpEntity<>(topUpRequest, headers);
 
-		ResponseEntity<Void> response = restTemplate.postForEntity(V1_WALLETS + walletId + TOP_UP, requestEntity, Void.class);
+		restTemplate.postForEntity(V1_WALLETS + walletId + TOP_UP, requestEntity, Void.class);
+		restTemplate.postForEntity(V1_WALLETS + walletId + TOP_UP, requestEntity, Void.class);
 
-		assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
 		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
 			Wallet updatedWallet = walletRepository.findById(walletId).get();
-			assertEquals(0, new BigDecimal("60.00").compareTo(updatedWallet.getBalance()));
+			assertEquals(0, new BigDecimal("150.00").compareTo(updatedWallet.getBalance()));
 		});
-		verify(paymentListener, timeout(1000)).handleTopUpRequest(any());
-		verify(walletListener, timeout(1000)).handlePaymentCompleted(any());
+
+		verify(paymentListener, timeout(1000).times(1)).handleTopUpRequest(any());
+		verify(walletListener, timeout(1000).times(1)).handlePaymentCompleted(any());
 		verify(notificationListener, never()).handlePaymentFailure(any());
 
 		ResponseEntity<List<WalletTransactionController.TransactionResponse>> transactionResponse = restTemplate.exchange(
@@ -141,7 +142,7 @@ public class WalletApplicationIT {
 		String token = obtainJwtToken();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(token);
-		var topUpRequest = new WalletController.TopUpRequest(new BigDecimal("5.00"), "1234", PAYMENT_PROVIDER);
+		var topUpRequest = new WalletController.TopUpRequest(UUID.randomUUID(), new BigDecimal("15.00"), "1234", PAYMENT_PROVIDER);
 		HttpEntity<WalletController.TopUpRequest> requestEntity = new HttpEntity<>(topUpRequest, headers);
 
 		ResponseEntity<Void> response = restTemplate.postForEntity(V1_WALLETS + walletId + TOP_UP, requestEntity, Void.class);

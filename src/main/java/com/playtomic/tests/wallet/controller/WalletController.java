@@ -26,6 +26,9 @@ public class WalletController {
 
     public record TopUpRequest(
             @NotNull
+            UUID idempotencyKey,
+
+            @NotNull
             @DecimalMin(value = "10.0", message = "Amount must be positive and greater than or equal to 10.0")
             BigDecimal amount,
 
@@ -45,7 +48,7 @@ public class WalletController {
 
     @PostMapping("/{walletId}/top-up")
     public ResponseEntity<Void> topUpWallet(@PathVariable UUID walletId, @Valid @RequestBody TopUpRequest request) {
-        walletService.topUp(walletId, request.amount(), request.creditCardNumber(), request.paymentProvider());
+        walletService.topUp(walletId, request.idempotencyKey(), request.amount(), request.creditCardNumber(), request.paymentProvider());
         return ResponseEntity.accepted().build();
     }
 

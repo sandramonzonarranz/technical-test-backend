@@ -18,11 +18,12 @@ The application is secured using Spring Security and JSON Web Tokens (JWT).
 * **Authentication:** The `POST /v1/auth/login` endpoint authenticates users and provides a JWT.
 * **Authorization:** The `JwtTokenFilter` intercepts all other requests to protected endpoints, validates the JWT, and sets the user's security context.
 
-### 3. Concurrency Control with Optimistic Locking and Retries
-To prevent data corruption from simultaneous updates, the application uses a robust optimistic locking strategy.
+### 3. Concurrency Control and Idempotency
+To prevent data corruption from simultaneous updates or network retries, the application uses a robust concurrency and idempotency strategy.
 
-* **`@Version` Annotation:** The `Wallet` entity has a `version` field, which Hibernate uses to manage concurrent updates. If two transactions attempt to update the same wallet, the second one will fail with an `ObjectOptimisticLockingFailureException`.
+* **Optimistic Locking with `@Version`:** The `Wallet` entity has a `version` field, which Hibernate uses to manage concurrent updates. If two transactions attempt to update the same wallet, the second one will fail with an `ObjectOptimisticLockingFailureException`.
 * **Automatic Retries:** The `WalletUpdateService` is annotated with `@Retryable`. If an `ObjectOptimisticLockingFailureException` occurs, Spring will automatically retry the operation up to 3 times before failing.
+* **Idempotency Key:** The `top-up` endpoint is idempotent. Clients must provide a unique `idempotencyKey` (UUID) in the request body. The system checks if a `WalletTransaction` with this key already exists. If it does, the request is acknowledged as successful without being re-processed. A unique constraint in the database on `(wallet_id, idempotencyKey)` provides a final guarantee against race conditions.
 * **Reconciliation:** If all retry attempts fail, the service publishes a `WalletReconciliationEvent`, signaling that this transaction requires manual review.
 
 ### 4. Comprehensive Testing Strategy

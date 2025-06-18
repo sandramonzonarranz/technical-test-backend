@@ -55,7 +55,7 @@ public class WalletControllerTest {
 
     @BeforeEach
     void setUp() {
-        topUpRequest = new WalletController.TopUpRequest(new BigDecimal("10.00"), CREDIT_CARD_NUMBER, PAYMENT_PROVIDER);
+        topUpRequest = new WalletController.TopUpRequest(UUID.randomUUID(), new BigDecimal("10.00"), CREDIT_CARD_NUMBER, PAYMENT_PROVIDER);
     }
 
     @Test
@@ -84,13 +84,13 @@ public class WalletControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isAccepted());
-        verify(walletService).topUp(eq(ID), any(BigDecimal.class), eq(CREDIT_CARD_NUMBER), eq(PAYMENT_PROVIDER));
+        verify(walletService).topUp(eq(ID), any(UUID.class), any(BigDecimal.class), eq(CREDIT_CARD_NUMBER), eq(PAYMENT_PROVIDER));
     }
 
     @Test
     @WithMockUser
     void topUpWalletInvalidRequestReturnBadRequest() throws Exception {
-        WalletController.TopUpRequest invalidRequest = new WalletController.TopUpRequest(null, null, null);
+        WalletController.TopUpRequest invalidRequest = new WalletController.TopUpRequest(null, null, null, null);
         String requestJson = new ObjectMapper().writeValueAsString(invalidRequest);
 
         mockMvc.perform(post(WALLET_ENDPOINT + ID + TOP_UP)

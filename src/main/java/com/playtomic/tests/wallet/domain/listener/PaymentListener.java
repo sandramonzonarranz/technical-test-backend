@@ -28,7 +28,7 @@ public class PaymentListener {
             PaymentService paymentService = paymentServiceProvider.getService(event.provider());
             var payment = paymentService.charge(event.creditCardNumber(), event.amount());
             log.info("Payment successful via {}. Payment ID: {}. Publishing PaymentCompletedEvent.", event.provider(), payment.getId());
-            eventPublisher.publishEvent(new PaymentCompletedEvent(event.walletId(), payment.getId(), event.amount()));
+            eventPublisher.publishEvent(new PaymentCompletedEvent(event.walletId(), event.idempotencyKey(), payment.getId(), event.amount()));
         } catch (StripeServiceException e) {
             log.error("Payment failed for Wallet ID: {}. Reason: {}. Publishing PaymentFailedEvent.", event.walletId(), e.getClass().getSimpleName(), e);
             eventPublisher.publishEvent(new PaymentFailedEvent(event.walletId(), e.getClass().getSimpleName()));

@@ -53,7 +53,9 @@ public class WalletTransactionControllerTest {
                 wallet,
                 new BigDecimal("50.00"),
                 WalletTransaction.TransactionType.TOP_UP,
-                ZonedDateTime.now()
+                ZonedDateTime.now(),
+                UUID.randomUUID(),
+                WalletTransaction.Status.COMPLETED
         );
 
         given(transactionService.findTransactionsByWalletId(walletId)).willReturn(List.of(transaction));
